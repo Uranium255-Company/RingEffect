@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+    * {
+      margin: 0px;
+    }
+    h1{
+      position: absolute;
+      top: 10%;
+      left: 10%;
+      font-size: 80px;
+      color: white;
+    }
+    </style>
+  </head>
+  <body>
+    <h1>
+    Uranium 235
+  </h1>
+
+
+    <canvas id='canvas'>
+
+    </canvas>n
+
+      <script>
+      const canvas = document.getElementById('canvas');
+      let ctx = canvas.getContext('2d');
+      ctx.fillStyle = 'rgba(20, 20, 20, 1)'
+      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight)
+      // Update the screen width
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      let returnRandomObject = (array) => {
+        return array[Math.floor(Math.random() * array.length)]
+      }
+      // The colors we wanna include
+      const colorsOfCircles = [
+        '#de38c8',
+        '#a992fa',
+        '#01ffff',
+      ];
+      console.log(returnRandomObject(colorsOfCircles))
+      let rectIntersect = (obj1, obj2) => {
+
+          let isNearX =  Math.abs(obj1.x - obj2.x) < obj1.radius * 2 ? true: false;
+          let isNearY =  Math.abs(obj1.y - obj2.y) < obj1.radius * 2 ? true: false;
+
+        if (isNearX && isNearY) {
+          obj1.isColliding = true;
+          obj2.isColliding = true;
+
+        }
+
+      }
+      class Circle {
+        constructor(radius) {
+          this.x =  Math.random() * window.innerWidth;
+          this.y = Math.random() * window.innerHeight;
+          this.dx = (Math.random() -0.5) * 6;
+          this.dy = (Math.random() - 0.5) *  6;
+          this.initalRadius = radius;
+          this.minRadius = 6;
+          this.maxRadius = 20;
+          this.radius = this.initalRadius;
+          this.isColliding = false;
+          this.initalColor = returnRandomObject(colorsOfCircles);
+
+          this.color = this.initalColor;
+        }
+        checkCollision() {
+          if(this.isColliding) {
+            this.radius < this.maxRadius ? this.radius += 0.5 : this.radius -= 0.5;
+          } else {
+            this.radius > this.minRadius? this.radius -= 0.5:  this.radius += 0.5;
+          }
+        }
+        draw() {
+          ctx.beginPath()
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
+          ctx.strokeStyle= this.color
+          ctx.lineWidth  = 1.5
+          ctx.stroke()
+          ctx.closePath()
+        }
+        checkCorners(){
+          (this.x + this.maxRadius > window.innerWidth || this.x - this.maxRadius < 0) ? this.dx *= -1 : null;
+          (this.y + this.maxRadius > window.innerHeight || this.y - this.maxRadius < 0) ? this.dy *= -1 : null;
+        }
+        update() {
+          this.x += this.dx; this.y += this.dy;
+          // Check to see if isColliding
+          this.checkCollision()
+          // Check to see if the object has hit the corners
+          this.checkCorners()
+          // Draws the object in the canvas
+          this.draw()
+        }
+      }
+      let collisions = 0;
+      // Collision detection function
+      function detectCollisions(objArray){
+          let obj1;
+          let obj2;
+
+          // Reset collision state of all objects
+          for (let i = 0; i < objArray.length; i++) {
+              objArray[i].isColliding = false;
+          }
+
+          // Start checking for collisions
+          for (let i = 0; i < objArray.length; i++)
+          {
+              obj1 = objArray[i];
+              for (let j = i + 1; j < objArray.length; j++)
+              {
+                  obj2 = objArray[j];
+                  let isIntersecting = rectIntersect(obj1, obj2)
+
+              }
+           }
+      }
+
+
+
+      let objectsArray = [];
+      let numberOfObjects = 200;
+      let initialize = () => {
+        for (var i = 0; i < numberOfObjects ; i++) {
+          objectsArray.push(new Circle(30))
+        }
+      }
+      initialize()
+      let Animation = () => {
+        // Refresh the screen
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.08)'
+        ctx.fillRect(0, 0, window.innerWidth, window.innerHeight)
+        // Draw each object in the array on the canvas
+        objectsArray.forEach((obj)=> {
+          obj.update()
+        });
+
+        // checkForCollisions
+        detectCollisions(objectsArray)
+        // Initaite the loop
+        window.requestAnimationFrame(Animation);
+      }
+
+      Animation();
+      </script>
+  </body>
+</html>
